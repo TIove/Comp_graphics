@@ -5,6 +5,7 @@
 2. Output_file_name  
 3. Command  
 ```
+[Исходное изображение](images/RGB_default.jpeg)
 * Команда  
   0 - [Инверсия](images/RGB_inversion.jpeg)  
   1 - [Отразить по горизонтали](images/RGB_Horizontal_mirror.jpeg)  

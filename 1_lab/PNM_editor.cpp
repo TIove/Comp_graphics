@@ -13,9 +13,17 @@ struct RGB {
 };
 
 class PNM {
+public:
+    void start(int argc, char* argv[]) {
+        check_condition(argc, argv);
+        read(argv[1]);
+        execute((short) stoi(argv[3]));
+        write(argv[2]);
+    }
+
 private:
-    short type_of_pnm = -1;
-    int width = -1, height = -1, colors = -1;
+    short type_of_pnm = -1, colors = -1;
+    int width = -1, height = -1;
 
     vector<uchar> matrix_P5;
     vector<RGB> matrix_P6;
@@ -113,43 +121,41 @@ private:
         matrix_P6 = turnedDataP6;
     }
 
-public:
     void read(const string& fileName) {
-        ifstream inputFile(fileName, ios::binary);
+        ifstream fin(fileName, ios::binary);
 
-        if (!inputFile.is_open()) {
+        if (!fin.is_open()) {
             cout << "Input file wasn't open\n";
-            exit(-1);
+            exit(1);
         }
         char P;
-        inputFile >> P >> type_of_pnm >> width >> height >> colors;
+        fin >> P >> type_of_pnm >> width >> height >> colors;
 
         if (P != 'P') {
             cout << "Error format\n";
-            exit(-1);
+            exit(1);
         }
         if (type_of_pnm != 5 && type_of_pnm != 6) {
             cout << "Error format\n";
-            exit(-1);
+            exit(1);
         }
         if (colors != 255) {
             cout << "Error format of color";
-            exit(-1);
+            exit(1);
         }
 
-        inputFile.get();
+        fin.get();
         if (type_of_pnm == 5) {
             matrix_P5.clear();
             matrix_P5.resize(width * height);
-            inputFile.read((char *) &matrix_P5[0], width * height);
-        }
-        else
-        if (type_of_pnm == 6) {
+            fin.read((char *) &matrix_P5[0], width * height);
+        } else 
+            if (type_of_pnm == 6) {
             matrix_P6.clear();
             matrix_P6.resize(width * height);
 
             auto* buffer = new uchar[width * height * 3];
-            inputFile.read((char*) buffer, width * height * 3);
+            fin.read((char*) buffer, width * height * 3);
 
             for (int i = 0; i < width * height; i++) {
                 matrix_P6[i].R = buffer[i * 3 + 0];
@@ -160,37 +166,38 @@ public:
             delete[] buffer;
         }
 
-        inputFile.close();
+        fin.close();
     }
 
     void write(const string& fileName) {
-        ofstream outputFile(fileName, ios::binary);
-        if (!outputFile.is_open()) {
+        ofstream fout(fileName, ios::binary);
+        if (!fout.is_open()) {
             cout << "Output file wasn't open\n";
-            exit(-1);
+            exit(1);
         }
 
-        outputFile << "P" << type_of_pnm << '\n';
-        outputFile << width << ' ' << height << '\n';
-        outputFile << colors << '\n';
+        fout << "P" << type_of_pnm << '\n';
+        fout << width << ' ' << height << '\n';
+        fout << colors << '\n';
 
         if (type_of_pnm == 5)
-            outputFile.write((char*) &matrix_P5[0], width * height);
+            fout.write((char*) &matrix_P5[0], width * height);
         else
-        if (type_of_pnm == 6) {
-            uchar* buffer = new uchar[width * height * 3];
-            for (int i = 0; i < width * height; i++) {
-                buffer[i * 3 + 0] = matrix_P6[i].R;
-                buffer[i * 3 + 1] = matrix_P6[i].G;
-                buffer[i * 3 + 2] = matrix_P6[i].B;
-            }
-            outputFile.write((char*) buffer, width * height * 3);
-            delete[] buffer;
+            if (type_of_pnm == 6) {
+                auto buffer = new uchar[width * height * 3];
+
+                for (int i = 0; i < width * height; i++) {
+                    buffer[i * 3 + 0] = matrix_P6[i].R;
+                    buffer[i * 3 + 1] = matrix_P6[i].G;
+                    buffer[i * 3 + 2] = matrix_P6[i].B;
+                }
+                fout.write((char*) buffer, width * height * 3);
+                delete[] buffer;
         }
-        outputFile.close();
+        fout.close();
     }
 
-    void execute(short cmd) {
+    void execute(const short& cmd) {
         switch(cmd) {
             case 0:
                 if (type_of_pnm == 5)
@@ -230,31 +237,27 @@ public:
 
                 break;
             default:
-                exit(-1);
+                exit(1);
+        }
+    }
+
+    static void check_condition(int argc, char* argv[]) {
+        short cmd = (short) stoi(argv[3]);
+
+        if (argc != 4) {
+            cout << "Incorrect count of arguments\n";
+            exit(1);
+        }
+        if (cmd > 4 || cmd < 0) {
+            cout << "Wrong command";
+            exit(1);
         }
     }
 };
 
 int main(int argc, char* argv[]) {
-    if (argc != 4) {
-        cout << "Incorrect count of arguments\n";
-        return 0;
-    }
-    string in_name = argv[1], out_name = argv[2];
-
-    short command;
-    command = (short) stoi(argv[3], nullptr);
-
-    if (command > 4 || command < 0) {
-        cout << "Wrong command";
-        return -1;
-    }
-
     PNM pic;
 
-    pic.read(in_name);
-    pic.execute(command);
-    pic.write(out_name);
-
+    pic.start(argc, argv);
     return 0;
 }

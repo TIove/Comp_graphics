@@ -17,7 +17,7 @@ public:
     void start(int argc, char* argv[]) {
         check_condition(argc, argv);
         read(argv[1]);
-        execute((short) stoi(argv[3]));
+        choose_option((short) stoi(argv[3]));
         write(argv[2]);
     }
 
@@ -197,7 +197,7 @@ private:
         fout.close();
     }
 
-    void execute(const short& cmd) {
+    void choose_option(const short& cmd) {
         switch(cmd) {
             case 0:
                 if (type_of_pnm == 5)

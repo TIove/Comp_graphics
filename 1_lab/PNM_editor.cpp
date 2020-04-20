@@ -6,15 +6,9 @@ typedef unsigned char uchar;
 
 using namespace std;
 
-struct RGB {
-    uchar R;
-    uchar G;
-    uchar B;
-};
-
 class PNM {
 public:
-    void start(int argc, char* argv[]) {
+    void edit(int argc, char* argv[]) {
         check_condition(argc, argv);
         read(argv[1]);
         choose_option((short) stoi(argv[3]));
@@ -22,6 +16,11 @@ public:
     }
 
 private:
+    struct RGB {
+        uchar R;
+        uchar G;
+        uchar B;
+    };
     short type_of_pnm = -1, colors = -1;
     int width = -1, height = -1;
 
@@ -258,6 +257,6 @@ private:
 int main(int argc, char* argv[]) {
     PNM pic;
 
-    pic.start(argc, argv);
+    pic.edit(argc, argv);
     return 0;
 }

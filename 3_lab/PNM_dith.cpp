@@ -86,7 +86,7 @@ double PNM_dith::gamma_set(double value) {
         if (value < 0.0031308)
             return value * 12.92 * 255;
         else
-            return 255. * ((211.0 * std::pow (value, 0.4166) - 11.0) / 200.0);
+            return 255. * ((211.0 * pow (value, 0.4166) - 11.0) / 200.0);
     }
     else {
         return 255. * pow(value, gamma);
@@ -98,10 +98,10 @@ double PNM_dith::gamma_remove(double value){
         if (value < 0.04045)
             return 255 * value * 12.92;
         else
-            return 255 * (std::pow ((200.0 * value + 11.0) / 211.0, 2.4));
+            return 255 * (pow ((200.0 * value + 11.0) / 211.0, 2.4));
     }
     else {
-        return 255 * std::pow (value, 1 / gamma);
+        return 255 * pow (value, 1 / gamma);
         }
 }
 
@@ -135,7 +135,7 @@ void PNM_dith::dith_algo(const Dith_type &type, const int &bitRate) {
     }
 }
 
-void PNM_dith::none(const Dith_type &type, const int &bitRate, const int value) {
+void PNM_dith::none(const Dith_type &type, const int &bitRate, const int& value) {
     for (int i = 0; i < width * height; ++i) {
         double buffer = gamma_remove((double) data[i]) / 255.0;
         buffer *= value - 1;
@@ -143,6 +143,175 @@ void PNM_dith::none(const Dith_type &type, const int &bitRate, const int value) 
         data[i] = round ((int) (gamma_set(buffer * (255.0 / (value - 1.0)))));
     }
 }
+
+void PNM_dith::ordered(const Dith_type &type, const int &bitRate, const int& value) {
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            double buffer = (gamma_remove(data[i * width + j]) +
+                             (255.0 / (bitRate)) * (Ordered[i % 8][j % 8] - 0.5)) / 255.0;
+            if (buffer < 0)
+                buffer = 0;
+
+            buffer *= value - 1;
+            buffer = round (buffer);
+            data[i * width + j] = round ((int) (gamma_remove (buffer * (255.0 / (value - 1)))));
+        }
+    }
+}
+
+void PNM_dith::random(const Dith_type &type, const int &bitRate, const int &value) {
+    uchar maxValue = pow(2, bitRate) - 1;
+
+    srand(time(NULL));
+
+    for (int i = 0; i < height; i++) {
+        for (int j = 0; j < width; j++) {
+            double picColorSRGB = data[width * i + j] / 255.0;
+            double picColorLinear = gamma_remove(picColorSRGB);
+            double noise =  (double) rand() / RAND_MAX - 0.75;
+            double value = picColorLinear + noise / bitRate;
+
+            value = min(max(value, 0.0), 1.0);
+
+            double newPaletteColor = round(value * maxValue);
+            data[width * i + j] = gamma_set(newPaletteColor / maxValue * 255);
+        }
+    }
+}
+
+void PNM_dith::floyd(const Dith_type &type, const int &bitRate, const int &value) {
+    vector <int> error (height * width, 0);
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j){
+
+            double buffer = (gamma_remove(data[i * width + j]) + error[i * width + j]) / 255.0;
+            buffer *= (value - 1);
+            buffer = round (buffer);
+            buffer *= 255.0 / (value - 1);
+            int CurrentErrorValue = data[i * width + j] + error[i * width + j] - (int) buffer;
+            data[i * width + j] = (int) buffer;
+            if (j + 1 < width) {
+                error[i * width + j + 1] += CurrentErrorValue * (7.0 / 16.0);
+            }
+            if (i + 1 < height) {
+                if (j + 1 < width) {
+                    error[(i + 1) * width + j + 1] += CurrentErrorValue * (1.0 / 16.0);
+                }
+                error[(i + 1) * width + j] += CurrentErrorValue * (5.0 / 16.0);
+                if ((i - 1 > 0) && (j - 1 > 0)) {
+                    error[(i - 1) * width + j - 1] += CurrentErrorValue * (3.0 / 16.0);
+                }
+            }
+
+        }
+    }
+}
+
+void PNM_dith::jarvis(const Dith_type &type, const int &bitRate, const int &value) {
+    vector <int> error (height * width, 0);
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            double buffer = (gamma_remove(data[i * width + j]) + error[i * width + j]) / 255.0;
+            buffer *= (value - 1);
+            buffer = round (buffer);
+            buffer *= 255.0 / (value - 1);
+            int CurrentErrorValue = data[i * width + j] + error[i * width + j] - (int) buffer;
+            data[i * width + j] = (int) buffer;
+            for (int k = 0; k <= 2; ++k) {
+                for (int l = -2; l <= 2; ++l) {
+                    if (i + k < height) {
+                        if ((k == 0) && (l > 0)) {
+                            if (j + l < width) {
+                                error[(i + k) * width + j + l] += CurrentErrorValue * JJN[k][2 + l] / 48.0;
+                            }
+                        }
+                        else {
+                            if ((j + l < width) && (j + l > 0)) {
+                                error[(i + k) * width + j + l] += CurrentErrorValue * JJN[k][2 + l] / 48.0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void PNM_dith::sierra(const Dith_type &type, const int &bitRate, const int &value) {
+    vector <int> error (height * width, 0);
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+
+
+            double buffer = (gamma_remove(data[i * width + j]) + error[i * width + j]) / 255.0;
+            buffer *= (value - 1);
+            buffer = round (buffer);
+            buffer *= 255.0 / (value - 1);
+            int CurrentErrorValue = data[i * width + j] + error[i * width + j] - (int) buffer;
+            data[i * width + j] = (int) buffer;
+            for (int k = 0; k <= 2; ++k) {
+                for (int l = -2; l <= 2; ++l) {
+                    if (i + k < height) {
+                        if ((k == 0) && (l > 0)) {
+                            if (j + l < width)
+                                error[(i + k) * width + j + l] += CurrentErrorValue * Sierra3[k][2 + l] / 32.0;
+                        } else {
+                            if ((j + l < width) && (j + l > 0))
+                                error[(i + k) * width + j + l] += CurrentErrorValue * Sierra3[k][2 + l] / 32.0;
+                        }
+                    }
+                }
+            }
+
+
+        }
+    }
+}
+
+void PNM_dith::atkinson(const Dith_type &type, const int &bitRate, const int &value) {
+    vector <int> error (height * width, 0);
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            double buffer = (gamma_remove(data[i * width + j]) + error[i * width + j]) / 255.0;
+            buffer *= (value - 1);
+            buffer = round (buffer);
+            buffer *= 255.0 / (value - 1);
+            int CurrentErrorValue = data[i * width + j] + error[i * width + j] - (int) buffer;
+            data[i * width + j] = (int) buffer;
+            for (int k = 0; k <= 2; ++k) {
+                for (int l = -2; l <= 2; ++l) {
+                    if (i + k < height) {
+                        if ((k == 0) && (l > 0)) {
+                            if (j + l < width) {
+                                error[(i + k) * width + j + l] += CurrentErrorValue * Atkinson[k][2 + l] / 8.0;
+                            }
+                        } else {
+                            if ((j + l < width) && (j + l > 0)) {
+                                error[(i + k) * width + j + l] += CurrentErrorValue * Atkinson[k][2 + l] / 8.0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void PNM_dith::halftone(const Dith_type &type, const int &bitRate, const int &value) {
+    for (int i = 0; i < height; ++i) {
+        for (int j = 0; j < width; ++j) {
+            double buffer = (gamma_remove (data[i * width + j]) +
+                             (255.0 / bitRate) * (Halftone[i % 4][j % 4] - 0.75)) / 255.0;
+            if (buffer < 0)
+                buffer = 0;
+
+            buffer *= value;
+            buffer = round (buffer);
+            data[i * width + j] = (uchar) round( gamma_set(buffer * (255.0 / (value - 1))));
+        }
+    }
+}
+
 
 
 

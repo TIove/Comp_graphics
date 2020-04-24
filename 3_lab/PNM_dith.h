@@ -35,12 +35,12 @@ private:
     double gamma_set (double value);
     double gamma_remove (double value);
 
-    void none(const Dith_type& type, const int& bitRate, const int value);
-    void ordered(const Dith_type& type, const int& bitRate, const int value);
-    void random(const Dith_type& type, const int& bitRate, const int value);
-    void floyd(const Dith_type& type, const int& bitRate, const int value);
-    void jarvis(const Dith_type& type, const int& bitRate, const int value);
-    void sierra(const Dith_type& type, const int& bitRate, const int value);
-    void atkinson(const Dith_type& type, const int& bitRate, const int value);
-    void halftone(const Dith_type& type, const int& bitRate, const int value);
+    void none(const Dith_type& type, const int& bitRate, const int& value);
+    void ordered(const Dith_type& type, const int& bitRate, const int& value);
+    void random(const Dith_type& type, const int& bitRate, const int& value);
+    void floyd(const Dith_type& type, const int& bitRate, const int& value);
+    void jarvis(const Dith_type& type, const int& bitRate, const int& value);
+    void sierra(const Dith_type& type, const int& bitRate, const int& value);
+    void atkinson(const Dith_type& type, const int& bitRate, const int& value);
+    void halftone(const Dith_type& type, const int& bitRate, const int& value);
 };

@@ -10,9 +10,9 @@ int main (int argc, char* argv[]) {
     string fout = argv[2];
     
     bool grad;
-    if (stoi(argv[3]) == '1')
+    if (stoi(argv[3]) == 1)
         grad = true;
-    else if (stoi(argv[3]) == '0')
+    else if (stoi(argv[3]) == 0)
         grad = false;
     else {
         cerr << "Grad must be 1 or 0 and you entered " << stoi(argv[3]) << endl;

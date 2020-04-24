@@ -154,7 +154,7 @@ void PNM_dith::ordered(const Dith_type &type, const int &bitRate, const int& val
 
             buffer *= value - 1;
             buffer = round (buffer);
-            data[i * width + j] = round ((int) (gamma_remove (buffer * (255.0 / (value - 1)))));
+            data[i * width + j] = round ((int) (gamma_set (buffer * (255.0 / (value - 1)))));
         }
     }
 }
@@ -189,7 +189,7 @@ void PNM_dith::floyd(const Dith_type &type, const int &bitRate, const int &value
             buffer = round (buffer);
             buffer *= 255.0 / (value - 1);
             int CurrentErrorValue = data[i * width + j] + error[i * width + j] - (int) buffer;
-            data[i * width + j] = (int) buffer;
+            data[i * width + j] = gamma_set(buffer);
             if (j + 1 < width) {
                 error[i * width + j + 1] += CurrentErrorValue * (7.0 / 16.0);
             }
@@ -202,7 +202,6 @@ void PNM_dith::floyd(const Dith_type &type, const int &bitRate, const int &value
                     error[(i - 1) * width + j - 1] += CurrentErrorValue * (3.0 / 16.0);
                 }
             }
-
         }
     }
 }
@@ -216,7 +215,7 @@ void PNM_dith::jarvis(const Dith_type &type, const int &bitRate, const int &valu
             buffer = round (buffer);
             buffer *= 255.0 / (value - 1);
             int CurrentErrorValue = data[i * width + j] + error[i * width + j] - (int) buffer;
-            data[i * width + j] = (int) buffer;
+            data[i * width + j] = gamma_set(buffer);
             for (int k = 0; k <= 2; ++k) {
                 for (int l = -2; l <= 2; ++l) {
                     if (i + k < height) {
@@ -248,7 +247,7 @@ void PNM_dith::sierra(const Dith_type &type, const int &bitRate, const int &valu
             buffer = round (buffer);
             buffer *= 255.0 / (value - 1);
             int CurrentErrorValue = data[i * width + j] + error[i * width + j] - (int) buffer;
-            data[i * width + j] = (int) buffer;
+            data[i * width + j] = gamma_set(buffer);
             for (int k = 0; k <= 2; ++k) {
                 for (int l = -2; l <= 2; ++l) {
                     if (i + k < height) {
@@ -277,7 +276,7 @@ void PNM_dith::atkinson(const Dith_type &type, const int &bitRate, const int &va
             buffer = round (buffer);
             buffer *= 255.0 / (value - 1);
             int CurrentErrorValue = data[i * width + j] + error[i * width + j] - (int) buffer;
-            data[i * width + j] = (int) buffer;
+            data[i * width + j] = gamma_set(buffer);
             for (int k = 0; k <= 2; ++k) {
                 for (int l = -2; l <= 2; ++l) {
                     if (i + k < height) {

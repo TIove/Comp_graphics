@@ -2,7 +2,7 @@
 using namespace std;
 
 int main (int argc, char* argv[]) {
-    if (argc != 6) {
+    if (argc != 7) {
         cerr << "Incorrect count of arguments" << endl;
         return 1;
     }
@@ -19,14 +19,26 @@ int main (int argc, char* argv[]) {
         return 1;
     }
 
+    Dith_type type = (Dith_type) stoi (argv[4]);
     if (0 > stoi(argv[4]) or stoi(argv[4]) > 7) {
         cerr << "Incorrect type of algorithm, it must be between 0 to 7" << endl;
         return 1;
     }
-    uchar bitRate = stoi(argv[5]);
+    int bitRate = stoi(argv[5]);
     if (bitRate > 8 or bitRate < 1) {
         cerr << "Incorrect bitrate of result, it must be between 1 to 8" << endl;
         return 1;
     }
-    //double gamma = stod(argv[6]);
+
+    PNM_dith pic;
+    pic.gamma = stod(argv[6]);
+
+    pic.read(fin);
+
+    if (grad)
+        pic.fill_grad();
+
+    pic.dith_algo(type, bitRate);
+
+    pic.write(fout);
 }

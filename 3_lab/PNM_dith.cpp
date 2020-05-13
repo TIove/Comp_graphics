@@ -162,7 +162,7 @@ void PNM_dith::ordered(const Dith_type &type, const int &bitRate, const int& val
 void PNM_dith::random(const Dith_type &type, const int &bitRate, const int &value) {
     uchar maxValue = pow(2, bitRate) - 1;
 
-    srand(time(NULL));
+    srand(1);
 
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {

@@ -1,14 +1,24 @@
-# Программа изменения изображения .pnm  
+# App for rotating and getting inversion of PGM image  
 ```
-В консоль подается 3 аргумента:  
-1. Input_file_name  
-2. Output_file_name  
-3. Command  
+Arguments in through the command line:
+lab#.exe <name_of_input_file> <name_of_output_file> <option>
+Where <option> is:
+0 - Inversion,
+1 - Flip horizontal,
+2 - Flip vertical,
+3 - Rotation of +90,
+4 - Rotation of -90.
 ```
-[Исходное изображение](images/RGB_default.jpeg)
-* Команда  
-  0 - [Инверсия](images/RGB_inversion.jpeg)  
-  1 - [Отразить по горизонтали](images/RGB_Horizontal_mirror.jpeg)  
-  2 - [Отразить по вертикали](images/RGB_Vertical_mirror.jpeg)  
-  3 - [Поворот на +90 градусов](images/RGB_Turn_right.jpeg)  
-  4 - [Поворот на -90 градусов](images/RGB_Turn_left.jpeg)  
+  ### Default
+![Default](images/default.png)
+# Changed images
+  ### Inversion
+  ![Inversion](images/inverion.png)  
+  ### Flip horizontal
+  ![Flip horizontal](images/h_mirror.png)  
+  ### Flip vertical
+  ![Flip vertical](images/v_mirror.png)  
+  ### Rotation of +90
+  ![Rotation of +90](images/turn_right.png)  
+  ### Rotation of -90
+  ![Rotation of-90](images/turn_left.png)  
